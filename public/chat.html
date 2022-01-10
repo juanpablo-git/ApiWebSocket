@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="apresentacao"></div>
+    <div id="listasMenssage"></div>
+ 
+        <input type="text" placeholder="digite sua mensagem"  id="mensagem"/>
+   
+    <script src="/socket.io/socket.io.js"></script>
+    <script>  const socket = io();
+    const urlSearch =new URLSearchParams(window.location.search)
+    const userName = urlSearch.get("username")
+    const room = urlSearch.get("room")
+    console.log(userName,room)
+    
+    socket.emit("select_ROM",{
+        userName,room
+    },response=>{
+        response.forEach(menssage => {createMessage(menssage)});    
+    })
+    window.document.getElementById("apresentacao").innerHTML = "Ola "+userName
+    document.getElementById("mensagem").addEventListener("keypress",(event)=>{
+        if(event.key == "Enter"){
+            const menssage = event.target.value
+            const data = {
+                room,
+                menssage,
+                userName
+            }
+            socket.emit("message",data)
+        }
+    })
+    socket.on("message",data=>{
+        createMessage(data)
+
+        console.log(data)
+    })
+    function createMessage(data) {
+        const menssageDIV = document.getElementById("listasMenssage")
+        menssageDIV.innerHTML += `
+        <div>
+            <strong>@${data.userName}</strong>: ${data.text} 
+        </div>
+        `
+
+    }
+    </script>
+
+</body>
+</html>
